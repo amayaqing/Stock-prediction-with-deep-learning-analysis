@@ -1,0 +1,8 @@
+Model,Accuracy,Up/Down prediction
+TCN,0.806060606060606,Down
+LSTM,0.8,Up
+Random Forest,0.8,Down
+Logistic Regression,0.793939393939394,Down
+SVM,0.806060606060606,Down
+Naive Bayes,0.7151515151515152,Down
+KNN,0.7575757575757576,Down
