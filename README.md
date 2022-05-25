@@ -9,7 +9,13 @@ Stock market prediction is always an attractive and challenging task among inves
 
 ## Setup
 
-To setup and use our dashboard application, you could clone the repository and run app.py ($ python app.py). The dashboard will run on http://127.0.0.1:8050/ on your local computer.
+To setup and use our dashboard application, you could clone the repository and run app.py.
+```python script
+python app.py
+
+```
+
+The dashboard will run on http://127.0.0.1:8050/ on your local computer.
 
 The analysis and prediction will be automaticlaly up-to-date upon running the application, but it will take a while to update. Please be patient when waiting for opening.
 
