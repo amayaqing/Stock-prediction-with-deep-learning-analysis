@@ -10,8 +10,8 @@ Stock market prediction is always an attractive and challenging task among inves
 ## Setup
 
 To setup and use our dashboard application, you could clone the repository and run app.py.
-```python script
-python app.py
+```shell script
+python3 app.py
 
 ```
 
