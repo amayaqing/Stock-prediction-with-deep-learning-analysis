@@ -1,5 +1,3 @@
-# import dash_core_components as dcc
-# import dash_html_components as html
 from dash import dcc
 from dash import html
 import plotly.graph_objs as go
@@ -21,27 +19,11 @@ from company import *
 PATH = pathlib.Path(__file__).parent
 DATA_PATH = PATH.joinpath("../data").resolve()
 
-
-# start_time = "2018-08-08"
-# end_time = "2022-03-01"
-
 df_overview= pd.read_csv(DATA_PATH.joinpath("overview.csv"))
-
-# company_list = ["GOOG", "FB", "AMZN", "MSFT", "AAPL", "IBM", "^GSPC",
-#                 'DELL', 'SONY', 'INTC', 'TCEHY', 'HPQ', 'CSCO']
 
 stock = {}
 for company in company_list:
     stock[company] = pd.read_csv(DATA_PATH.joinpath("stock-{}.csv".format(company)))
-#
-#
-# sp500 = pd.read_csv(DATA_PATH.joinpath("stock-^GSPC.csv"))
-# google = pd.read_csv(DATA_PATH.joinpath("stock-GOOG.csv"))
-# fb = pd.read_csv(DATA_PATH.joinpath("stock-FB.csv"))
-# amazon = pd.read_csv(DATA_PATH.joinpath("stock-AMZN.csv"))
-# apple = pd.read_csv(DATA_PATH.joinpath("stock-AAPL.csv"))
-# microsoft = pd.read_csv(DATA_PATH.joinpath("stock-MSFT.csv"))
-# ibm = pd.read_csv(DATA_PATH.joinpath("stock-MSFT.csv"))
 
 
 
@@ -69,14 +51,6 @@ df_trend_pie = pd.DataFrame(
     data={'updown': [count_2, count_1, count_0]},
     index=['Great Up', 'Flat', 'Bad Down']
 )
-
-
-# df_current_prices = pd.read_csv(DATA_PATH.joinpath("df_current_prices.csv"))
-# df_hist_prices = pd.read_csv(DATA_PATH.joinpath("df_hist_prices.csv"))
-# df_avg_returns = pd.read_csv(DATA_PATH.joinpath("df_avg_returns.csv"))
-# df_after_tax = pd.read_csv(DATA_PATH.joinpath("df_after_tax.csv"))
-# df_recent_returns = pd.read_csv(DATA_PATH.joinpath("df_recent_returns.csv"))
-# df_graph = pd.read_csv(DATA_PATH.joinpath("df_graph.csv"))
 
 def create_layout(app):
     # Page layouts
@@ -122,10 +96,6 @@ def create_layout(app):
                                 [
                                     html.Br([]),
                                     html.H6("Stock Analysis and Prediction Overview", className="subtitle padded"),
-                                    # html.H6(
-                                    #     "Stock Analysis and Prediction Overview",
-                                    #     className="subtitle tiny-header padded",
-                                    # ),
                                     html.Div(
                                         [html.Table(
                                             # Header
@@ -135,12 +105,6 @@ def create_layout(app):
                                                 html.Td(df_overview.iloc[i][col]) for col in df_overview.columns
                                             ]) for i in range(df_overview.values.shape[0])]
                                         )],
-                                        # [
-                                        #     html.Table(
-                                        #         make_dash_table(stock_recommendation),
-                                        #         className="tiny-header",
-                                        #     )
-                                        # ],
                                         style={"overflow-x": "auto"},
                                     ),
                                 ],
@@ -376,40 +340,6 @@ def create_layout(app):
                         ],
                         className="row ",
                     ),
-                    # html.Div(
-                    #     [
-                    #         html.Div(
-                    #             [
-                    #                 html.H6("Prediction Index Price", className="subtitle padded"),
-                    #                 dcc.Graph(
-                    #                     figure={
-                    #                         "data": [
-                    #                             go.Scatter(
-                    #                                 x=sp500["Date"],
-                    #                                 y=sp500["Open"],
-                    #                                 line={"color": "#97151c"},
-                    #                                 mode="lines",
-                    #                                 name="History",
-                    #                             ),
-                    #                             go.Scatter(
-                    #                                 x=sp500_pred["Date"],
-                    #                                 y=sp500_pred['Pred'],
-                    #                                 line={"color": "#b5b5b5"},
-                    #                                 mode="lines",
-                    #                                 name="Prediction",
-                    #                             ),
-                    #                         ],
-                    #                     }
-                    #                 ),
-                    #             ],
-                    #             # className="twelve columns",
-                    #             className="wrapper",
-                    #         )
-                    #     ],
-                    #     className="row ",
-                    # ),
-
-
                 ],
                 className="sub_page",
             ),

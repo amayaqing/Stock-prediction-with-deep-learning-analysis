@@ -1,74 +1,10 @@
-import pandas as pd
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.svm import LinearSVC
-import nltk
-
-from nltk import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from sklearn.svm import SVC, LinearSVC
-from sklearn import tree
-from sklearn.mixture import GaussianMixture
-from sklearn.decomposition import PCA
-
-from matplotlib import pyplot as plt
-
-import datetime as dt
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
-import matplotlib.dates as dates
-
-import yfinance as yf
-from sklearn.preprocessing import MinMaxScaler
-from finta import TA
 import numpy as np
 import pandas as pd
-
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
-
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import plot_roc_curve
-from sklearn.metrics import plot_precision_recall_curve
-from sklearn.model_selection import train_test_split
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import LSTM
-from tensorflow.keras.layers import Dropout, Embedding
-from tensorflow.keras import regularizers
-from tensorflow.keras.utils import to_categorical
-
-import datetime
-from datetime import date
-import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
-from nltk.probability import FreqDist
 
-import snscrape.modules.twitter as sntwitter
-import csv
-import pandas as pd
-import time
-
-import sys
 import re
-import string
-import json
-import os
-
-import datetime
 import preprocessor as p
 from langdetect import detect
 
@@ -116,6 +52,20 @@ def tweet_process(company_name):
                     data.loc[i][j] = np.nan
 
     data.to_csv('data/text/cleaned{}.csv'.format(company_name), line_terminator='\n')
+
+
+def sentiment_scores(sentence):
+    sid_obj = SentimentIntensityAnalyzer()
+    sentiment_dict = sid_obj.polarity_scores(sentence)
+
+    if sentiment_dict['compound'] >= 0.05:
+        return 1
+
+    elif sentiment_dict['compound'] <= - 0.05:
+        return -1
+
+    else:
+        return 0
 
 
 def sentiment_analysis(company):

@@ -5,14 +5,11 @@ import time
 import datetime
 
 from twitter_process import *
+from company import *
+from stock_utils import *
 
 
-def getNextDay(y, m, d):
-    gDate = datetime.datetime(y, m, d)
-    nextday = gDate + datetime.timedelta(days=1)
-    nDate = '{:%Y-%m-%d}'.format(nextday)
-    return nDate
-
+# --------------------------- crawl tweets ------------------------------
 
 now = time.time()
 
@@ -20,8 +17,6 @@ data = pd.DataFrame(columns=['date'])
 for i in range(0, 60, 1):
     data.insert(data.shape[1], i, 0)
 
-company_list = ["GOOG", "FB", "AMZN", "MSFT", "AAPL", "IBM", "^GSPC",
-                'DELL', 'SONY', 'INTC', 'TCEHY', 'HPQ', 'CSCO']
 
 for company_name in company_list:
     idx = -1

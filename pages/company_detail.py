@@ -11,13 +11,6 @@ from dash_table import DataTable
 
 from company import *
 
-import plotly.express as px
-import plotly.graph_objects as go
-
-#
-# app = dash.Dash(
-#     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],
-# )
 
 # get relative data folder
 PATH = pathlib.Path(__file__).parent
@@ -29,13 +22,7 @@ df_avg_returns = pd.read_csv(DATA_PATH.joinpath("df_avg_returns.csv"))
 df_after_tax = pd.read_csv(DATA_PATH.joinpath("df_after_tax.csv"))
 df_recent_returns = pd.read_csv(DATA_PATH.joinpath("df_recent_returns.csv"))
 df_graph = pd.read_csv(DATA_PATH.joinpath("df_graph.csv"))
-
 df_updown = pd.read_csv(DATA_PATH.joinpath("updown-prediction-GOOG.csv"))
-
-
-# company_list = ["GOOG", "FB", "AMZN", "MSFT", "AAPL", "IBM"]
-# start_time = "2018-08-08"
-# end_time = "2022-03-08"
 
 data = pd.read_csv(DATA_PATH.joinpath("stock-GOOG.csv"))
 data["Date"] = pd.to_datetime(data["Date"], format="%Y-%m-%d")
@@ -76,9 +63,6 @@ def create_layout(app):
                             html.Div(
                                 [
                                     html.H6("Performance", className="subtitle padded"),
-                                    # html.H6(
-                                    #     ["Date Range Interested"]
-                                    # ),
                                     dcc.DatePickerRange(
                                         id="date-range",
                                         min_date_allowed=data.Date.min().date(),
@@ -94,7 +78,6 @@ def create_layout(app):
                                     ),
                                     dcc.Graph(id="performance_graph"),
                                 ],
-                                # className="twelve columns",
                                 className="wrapper",
                             )
                         ],
@@ -108,7 +91,6 @@ def create_layout(app):
                                     html.H6("Prediction Price", className="subtitle padded"),
                                     dcc.Graph(id="trend_prediction_graph"),
                                 ],
-                                # className="twelve columns",
                                 className="wrapper",
                             )
                         ],
@@ -158,10 +140,6 @@ def create_layout(app):
                                         id="wordcloud",
                                     ),
 
-                                    # html.Table(
-                                    #     make_dash_table(df_recent_returns),
-                                    #     className="tiny-header",
-                                    # ),
                                 ],
                                 className=" twelve columns",
                             )

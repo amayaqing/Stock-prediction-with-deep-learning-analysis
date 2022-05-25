@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import dash
-# import dash_core_components as dcc
-# import dash_html_components as html
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
@@ -10,19 +8,20 @@ import plotly.graph_objects as go
 import plotly
 import pathlib
 import pandas as pd
-from utils import *
+
 
 from pages import (
     overview,
     company_detail
 )
 
+from utils import *
 from stock_utils import *
 from trend_prediction import *
+from update_all import *
 
 # get relative data folder
 PATH = pathlib.Path(__file__).parent
-# DATA_PATH = PATH.joinpath("../").resolve()
 
 
 app = dash.Dash(
@@ -87,11 +86,6 @@ def display_candlestick(value, company, start_date, end_date):
     ],
 )
 def display_trend_prediction(company):
-    # train_data, res = trend_prediction_lstm(company, start_date, end_date)
-    start_date = "2018-08-08"
-    end_date = "2022-03-01"
-    # data = get_stock_data(company, start_date, end_date)
-    # train_data = data[(len(data) // 20) * 19:]
 
     res = pd.read_csv("data/trend-prediction-{}.csv".format(company))
     data = pd.read_csv("data/stock-{}.csv".format(company))
@@ -146,11 +140,16 @@ def update_wordcloud(company):
 
 
 
+start_time = "2018-01-01"
+end_time = date.today().strftime("%Y-%m-%d")
 
+print("Generating today's analysis......")
+update(start_time, end_time)
+print("Update completed. You can open the dashboard now.")
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
 
 
 

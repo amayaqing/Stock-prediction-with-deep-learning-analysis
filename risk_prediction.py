@@ -1,38 +1,25 @@
-import datetime as dt
-from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
-import matplotlib.dates as dates
 
 import yfinance as yf
 from sklearn.preprocessing import MinMaxScaler
 from finta import TA
 import numpy as np
 import pandas as pd
-
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import plot_roc_curve
-from sklearn.metrics import plot_precision_recall_curve
-from sklearn.model_selection import train_test_split
 from tcn import compiled_tcn
-
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 import sklearn
+
+from stock_utils import *
+from wordcloud import WordCloud
+
 
 
 def updown(v):
@@ -57,25 +44,12 @@ def process_date(date):
     return newdate
 
 
-def process_date(date):
-    datearr = date.split('-')
-
-    newdate = datearr[0]
-
-    newdate += '-'
-    if len(datearr[1]) == 1:
-        newdate += '0'
-    newdate += datearr[1]
-
-    newdate += '-'
-    if len(datearr[2]) == 1:
-        newdate += '0'
-    newdate += datearr[2]
-
-    return newdate
-
-
 def gather_data(company, start_time, end_time):
+
+    # the time of tweets collected, change it when collecting more tweets to train the model
+    start_time = "2018-01-01"
+    end_time = "2022-05-07"
+
     sentiment = pd.read_csv("data/rates/rates{}.csv".format(company))
     sentiment.date = [process_date(x) for x in sentiment.date]
     sentiment = sentiment[['date', 'pos', 'neg']]
@@ -95,9 +69,6 @@ def gather_data(company, start_time, end_time):
         hist_data.append([data['Open'][i], data['High'][i], data['Low'][i], data['Close'][i], data['Adj Close'][i],
                           data['Volume'][i]])
 
-    today = [data['Open'][last_idx], data['High'][last_idx], data['Low'][last_idx], data['Close'][last_idx],
-             data['Adj Close'][last_idx], data['Volume'][last_idx]]
-
     # Technical Indicators
     stock = data
     ema = TA.EMA(stock, 50).round(decimals=8)
@@ -112,13 +83,12 @@ def gather_data(company, start_time, end_time):
     vwap = TA.VWAP(stock).round(decimals=8)
 
     indicators = []
-    for i in range(20, last_idx + 1):
+    for i in range(20, last_idx):
         ind = [ema[i], adx[i], macd['MACD'][i], rsi[i], sar[i], cci[i], stoch[i], bop[i], do['MIDDLE'][i], vwap[i]]
         indicators.append(ind)
 
     # predicted needed data
-    stock_data = np.concatenate((hist_data, indicators[:-1]), 1)
-    today = list(today) + indicators[-1]
+    stock_data = np.concatenate((hist_data, indicators), 1)
 
     # add label
     label = []
@@ -137,20 +107,13 @@ def gather_data(company, start_time, end_time):
     scaler.fit(stock_data)
 
     stock_data = scaler.transform(stock_data)
-    today = scaler.transform([today])[0]
 
     # add sentiment analysis
     pos = np.array(data[20:last_idx]['pos']).reshape((data[20:last_idx]['pos'].shape[0], 1))
     neg = np.array(data[20:last_idx]['neg']).reshape((data[20:last_idx]['neg'].shape[0], 1))
     stock_data = np.concatenate((stock_data, pos, neg), 1)
 
-    pos_today = np.array(data[last_idx:last_idx + 1]['pos']).reshape((data[last_idx:last_idx + 1]['pos'].shape[0],))
-    neg_today = np.array(data[last_idx:last_idx + 1]['neg']).reshape((data[last_idx:last_idx + 1]['neg'].shape[0],))
-    today = np.concatenate((today, pos_today, neg_today))
-
-    print("today: ", today)
-
-    return stock_data, label, today
+    return stock_data, label
 
 
 
@@ -240,8 +203,6 @@ def tcn_model(X_train, X_test, y_train, y_test):
             y_pred.append(1)
     acc = accuracy_score(y_test, y_pred)
 
-    print("TCN predict: ", y_pred)
-
     return acc, tcn
 
 
@@ -300,8 +261,80 @@ def risk_prediction_tcn(X_train, X_test, y_train, y_test, today):
     return acc_tcn, pred
 
 
+
+def get_today_info(company):
+    today = date.today().strftime("%Y-%m-%d")
+    y, m, d = int(today.split('-')[0]), int(today.split('-')[1]), int(today.split('-')[2])
+
+    words, pos, neg = date_prediction(company, y, m, d)
+
+    nextday = getNextDay(y, m, d)
+    data = yf.download(company, start=start_time, end=nextday, interval="1d")
+    data['Date'] = data.index
+
+    last_idx = data.shape[0] - 1
+
+    stock = data
+    ema = TA.EMA(stock, 50).round(decimals=8)
+    adx = TA.ADX(stock).round(decimals=8)
+    macd = TA.MACD(stock).round(decimals=8)
+    rsi = TA.RSI(stock).round(decimals=8)
+    sar = TA.SAR(stock).round(decimals=8)
+    cci = TA.CCI(stock).round(decimals=8)
+    stoch = TA.STOCH(stock).round(decimals=8)
+    bop = TA.BOP(stock).round(decimals=8)
+    do = TA.DO(stock).round(decimals=8)
+    vwap = TA.VWAP(stock).round(decimals=8)
+
+    hist_data = []
+    for i in range(20, last_idx):
+        hist_data.append([data['Open'][i], data['High'][i], data['Low'][i], data['Close'][i], data['Adj Close'][i],
+                          data['Volume'][i]])
+    indicators = []
+    for i in range(20, last_idx + 1):
+        ind = [ema[i], adx[i], macd['MACD'][i], rsi[i], sar[i], cci[i], stoch[i], bop[i], do['MIDDLE'][i], vwap[i]]
+        indicators.append(ind)
+
+    stock_data = np.concatenate((hist_data, indicators[:-1]), 1)
+    today_data = [data['Open'][last_idx], data['High'][last_idx], data['Low'][last_idx], data['Close'][last_idx],
+                  data['Adj Close'][last_idx], data['Volume'][last_idx]] + indicators[-1]
+
+    scaler = MinMaxScaler()
+    scaler.fit(stock_data)
+
+    stock_data = scaler.transform(stock_data)
+    today_data = scaler.transform([today_data])[0]
+
+    today_data = list(today_data) + [pos, neg]
+
+    # generate wordcloud
+    keywords = company_list + ['tsla', 'stock', 'tickers']
+    for c in keywords:
+        words = words.replace(c.lower(), "")
+
+        # make wordcloud
+    if len(words) != 0:
+        wc = WordCloud(
+            max_words=200,
+            background_color='white',
+            width=2000,
+            height=1200
+        )
+
+        word_cloud = wc.generate(words)
+        word_cloud.background_color = 'white'
+        plt.imshow(word_cloud)
+        plt.axis("off")
+        plt.savefig('assets/wordcloud-{}.png'.format(company), dpi=300)
+        # plt.show()
+
+    return today_data
+
+
 def risk_prediction_all(company, start_time, end_time):
-    stock_data, label, today = gather_data(company, start_time, end_time)
+    stock_data, label = gather_data(company, start_time, end_time)
+    today = get_today_info(company)
+    today = np.array(today)
     X_train, X_test, y_train, y_test = train_test_split(
         stock_data, label, test_size=0.2, random_state=42)
 
